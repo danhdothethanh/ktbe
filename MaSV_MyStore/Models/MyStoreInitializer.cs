@@ -91,8 +91,8 @@ namespace MaSV_MyStore.Models
                 new Product { 
                     ProductName = "Sạc nhanh Anker 65W", 
                     Description = "3 cổng, GaN, nhỏ gọn", 
-                    Price = 890000, Quantity = 150, SoldQuantity = 300, CategoryID = 3, 
-                    ImageUrl = "https://images.unsplash.com/photo-1583863788434-e58a36338be9?w=400&h=400&fit=crop", 
+                    Price = 890000, Quantity = 150, SoldQuantity = 300, CategoryID = 3,
+                    ImageUrl = "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=400&h=400&fit=crop",
                     CreatedDate = DateTime.Now.AddDays(-50) 
                 },
 

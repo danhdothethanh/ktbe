@@ -10,20 +10,43 @@
     <!-- Bộ lọc -->
     <form method="get" class="row g-2 mb-4">
         <div class="col-md-5">
-            <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm theo mã đơn hoặc tên sản phẩm..." />
+            <input type="text" name="search" value="@ViewBag.Search" class="form-control"
+                   placeholder="Tìm theo mã đơn hoặc tên sản phẩm..." />
         </div>
         <div class="col-md-3">
             <select name="status" class="form-select">
-                <option value="All" @(ViewBag.Status?.ToString() == "All" ? "selected" : "")>Tất cả đơn</option>
-                <option value="Pending" @(ViewBag.Status?.ToString() == "Pending" ? "selected" : "")>Chờ xử lý</option>
-                <option value="Processing" @(ViewBag.Status?.ToString() == "Processing" ? "selected" : "")>Đang xử lý</option>
-                <option value="Shipping" @(ViewBag.Status?.ToString() == "Shipping" ? "selected" : "")>Đang vận chuyển</option>
-                <option value="Delivered" @(ViewBag.Status?.ToString() == "Delivered" ? "selected" : "")>Đã giao</option>
-                <option value="Cancelled" @(ViewBag.Status?.ToString() == "Cancelled" ? "selected" : "")>Đã hủy</option>
+                @{
+                    /* ========== FIX 1: Không dùng ?. trong Razor MVC5 ========== */
+                    string currentStatus = "All";
+                    if (ViewBag.Status != null)
+                    {
+                        currentStatus = ViewBag.Status.ToString();
+                    }
+                }
+                <option value="All" @(currentStatus == "All" ? "selected" : "")>
+                    Tất cả đơn
+                </option>
+                <option value="Pending" @(currentStatus == "Pending" ? "selected" : "")>
+                    Chờ xử lý
+                </option>
+                <option value="Processing" @(currentStatus == "Processing" ? "selected" : "")>
+                    Đang xử lý
+                </option>
+                <option value="Shipping" @(currentStatus == "Shipping" ? "selected" : "")>
+                    Đang vận chuyển
+                </option>
+                <option value="Delivered" @(currentStatus == "Delivered" ? "selected" : "")>
+                    Đã giao
+                </option>
+                <option value="Cancelled" @(currentStatus == "Cancelled" ? "selected" : "")>
+                    Đã hủy
+                </option>
             </select>
         </div>
         <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">Lọc</button>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-filter"></i> Lọc
+            </button>
         </div>
     </form>
 
@@ -31,19 +54,57 @@
     {
         foreach (var order in Model)
         {
+            /* ========== FIX 2: Khai báo badgeClass riêng biệt ========== */
             string badgeClass = "bg-secondary";
-            if (order.Status == "Delivered") badgeClass = "bg-success";
-            else if (order.Status == "Cancelled") badgeClass = "bg-danger";
-            else if (order.Status == "Shipping") badgeClass = "bg-info";
-            else if (order.Status == "Pending" || order.Status == "Processing") badgeClass = "bg-warning text-dark";
+            if (order.Status == "Delivered")
+            {
+                badgeClass = "bg-success";
+            }
+            else if (order.Status == "Cancelled")
+            {
+                badgeClass = "bg-danger";
+            }
+            else if (order.Status == "Shipping")
+            {
+                badgeClass = "bg-info";
+            }
+            else if (order.Status == "Pending" || order.Status == "Processing")
+            {
+                badgeClass = "bg-warning text-dark";
+            }
+
+            /* ========== FIX 3: Label tiếng Việt cho trạng thái ========== */
+            string statusLabel = "Không rõ";
+            if (order.Status == "Pending")
+            {
+                statusLabel = "Chờ xử lý";
+            }
+            else if (order.Status == "Processing")
+            {
+                statusLabel = "Đang xử lý";
+            }
+            else if (order.Status == "Shipping")
+            {
+                statusLabel = "Đang vận chuyển";
+            }
+            else if (order.Status == "Delivered")
+            {
+                statusLabel = "Đã giao";
+            }
+            else if (order.Status == "Cancelled")
+            {
+                statusLabel = "Đã hủy";
+            }
 
             <div class="card mb-3 shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
                         <strong>Đơn #@order.OrderID</strong>
-                        <span class="text-muted small ms-2">@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</span>
+                        <span class="text-muted small ms-2">
+                            @order.OrderDate.ToString("dd/MM/yyyy HH:mm")
+                        </span>
                     </div>
-                    <span class="badge @badgeClass">@order.Status</span>
+                    <span class="badge @badgeClass">@statusLabel</span>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -53,7 +114,14 @@
                                 {
                                     <li>
                                         <i class="fas fa-box text-muted me-1"></i>
-                                        @(d.Product != null ? d.Product.ProductName : "SP #" + d.ProductID)
+                                        @if (d.Product != null)
+                                        {
+                                            @d.Product.ProductName
+                                        }
+                                        else
+                                        {
+                                            <text>SP #@d.ProductID</text>
+                                        }
                                         <span class="text-muted">x @d.Quantity</span>
                                     </li>
                                 }
@@ -63,9 +131,12 @@
                             </p>
                         </div>
                         <div class="col-md-4 text-md-end">
-                            <p class="fs-5 text-danger fw-bold mb-2">@order.TotalAmount.ToString("N0") ₫</p>
-                            <a href="@Url.Action("OrderSuccess", "Order", new { id = order.OrderID })" class="btn btn-sm btn-outline-primary">
-                                Xem chi tiết
+                            <p class="fs-5 text-danger fw-bold mb-2">
+                                @order.TotalAmount.ToString("N0") ₫
+                            </p>
+                            <a href="@Url.Action("OrderSuccess", "Order", new { id = order.OrderID })"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> Xem chi tiết
                             </a>
                         </div>
                     </div>
@@ -78,7 +149,9 @@
         <div class="alert alert-info text-center py-5">
             <i class="fas fa-inbox fa-3x mb-3"></i>
             <h5>Bạn chưa có đơn hàng nào</h5>
-            <a href="@Url.Action("Index", "Home")" class="btn btn-primary mt-2">Mua sắm ngay</a>
+            <a href="@Url.Action("Index", "Home")" class="btn btn-primary mt-2">
+                <i class="fas fa-shopping-cart"></i> Mua sắm ngay
+            </a>
         </div>
     }
 </div>
